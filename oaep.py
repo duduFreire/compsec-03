@@ -6,15 +6,23 @@ HashF = Callable[[bytes], bytes]
 MgfFunc = Callable[[bytes, int, HashF], bytes]
 
 def xor(a: bytes, b: bytes) -> bytes:
+    """
+    Xor bit a bit in a bytearray
+    """
     return bytes(a^b for a, b in zip(a, b))
 
 def hashf_sha3_256(m: bytes) -> bytes:
+    """
+    sha3_256 hashf
+    """
     sha3 = hashlib.sha3_256()
     sha3.update(m)
     return sha3.digest()
 
 def mgf1(seed: bytes, length: int, hash_func=hashlib.sha1) -> bytes:
-    """Mask generation function."""
+    """
+    Mask generation function.
+    """
     hLen = hash_func().digest_size
 
     if length > (hLen << 32):
@@ -33,6 +41,9 @@ def encode(
     msg: bytes, sz: int, label: bytes = b"", 
     mgf: MgfFunc = mgf1, hashf: HashF = hashf_sha3_256
 ) -> bytes:
+    """
+    Encode like the OAEP standard
+    """
     lhash = hashf(label)
     hlen = len(lhash)
     msglen = len(msg)
@@ -53,6 +64,9 @@ def decode(
     cypher: bytes, sz: int, label: bytes = b"", 
     mgf: MgfFunc = mgf1, hashf: HashF = hashf_sha3_256
 ) -> bytes:
+    """
+    Decode like the OAEP standard
+    """
     lhash = hashf(label)
     hlen = len(lhash)
     masked_seed, masked_db = cypher[1:1 + hlen], cypher[1+hlen:]
