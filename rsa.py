@@ -12,6 +12,11 @@ class Key:
     mod: int
     key: int
 
+def read_key(key_path: str) -> Key:
+    with open(key_path, "r") as f:
+        mod_str, key_str  = f.read().split()
+        return Key(mod=int(mod_str), key=int(key_str))
+
 def binary_exp(a : int, b : int, n : int) -> int:
     """
     Computes a^b % n
@@ -134,7 +139,7 @@ def hashf_sha3_256(x: int) -> int:
     """
     sha3_256 hash function for integer
     """
-    h = hashlib.sha3_256(x.to_bytes(1024, "little"))
+    h = hashlib.sha3_256(x.to_bytes(2048, "little"))
     return int.from_bytes(h.digest(), "little")
 
 def sign(

@@ -19,7 +19,7 @@ def hashf_sha3_256(m: bytes) -> bytes:
     sha3.update(m)
     return sha3.digest()
 
-def mgf1(seed: bytes, length: int, hash_func=hashlib.sha1) -> bytes:
+def mgf1(seed: bytes, length: int, hash_func: HashF = hashlib.sha1) -> bytes:
     """
     Mask generation function.
     """
