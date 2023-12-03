@@ -176,7 +176,7 @@ def decrypt_message_and_verify(
     Decrypts a message and check signature
     """
     msg = decrypt(cypher, receiver_private_key)
-    hash_msg = hashf(msg)
+    hash_msg = hashf(msg) % sender_public_key.mod
     decrypt_signature = decrypt(signature, sender_public_key)
     return (decrypt_signature == hash_msg), msg
 
