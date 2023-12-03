@@ -34,8 +34,8 @@ def binary_exp(a : int, b : int, n : int) -> int:
 
 def extended_euclid(a : int, b : int) -> tuple[int, int, int]:
     """
-    Let d = gcd(a, b). Returns (d, x, y) with
-    a * x + b * y = d
+    Let d = gcd(a, b). Returns (d, x, y) such that
+    a * x + b * y = d.
     """
     oldr, r = a, b
     olds, s = 1, 0
@@ -51,7 +51,7 @@ def extended_euclid(a : int, b : int) -> tuple[int, int, int]:
 
 def mul_inv(a : int, n : int) -> int:
     """
-    Finds 1/a % n
+    Returns 1/a % n.
     """
     (d, inv, k) = extended_euclid(a, n)
     return inv % n
@@ -59,7 +59,8 @@ def mul_inv(a : int, n : int) -> int:
 
 def check_composite(a : int, n : int, s : int, d : int) -> bool:
     """
-    Finds if a number is composite givem some base
+    Checks if the number n is composite given some base a.
+    The arguments should satisfy n-1 = 2^s * d with d an odd integer.
     """
     cur = binary_exp(a, d, n)
     if cur == n-1 or cur == 1: return False
@@ -71,7 +72,9 @@ def check_composite(a : int, n : int, s : int, d : int) -> bool:
 
 def is_prime(n : int, iterations : int = 5) -> bool:
     """
-    Check if n is prime using miller rabin
+    Check if n is prime using the Miller-Rabin algorithm.
+    If is_prime(n) == false then n is composite.
+    Otherwise, there is a chance of 1-4^(-iterations) of n being prime.
     """
     if n <= 4: return n == 2 or n == 3
 
@@ -103,7 +106,7 @@ def random_prime(prime_size: int = 1024) -> int:
 
 def create_key(key_size: int  = 2048) -> tuple[Key, Key]:
     """
-    Generate a RSA public key and a private key
+    Generate an RSA public key and a private key
     """
     p = random_prime(key_size // 2)
     q = random_prime(key_size // 2)
@@ -179,6 +182,10 @@ def decrypt_message_and_verify(
 
 
 if __name__ == "__main__":
+    """
+        Tests the above functions by encrypting and decrypting
+        the message 123456789
+    """
     sender_public_key, sender_private_key, = create_key()
     receiver_public_key, receiver_private_key, = create_key()
     msg = 123456789

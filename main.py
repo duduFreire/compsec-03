@@ -1,5 +1,6 @@
 import sys, os
 import rsa, oaep
+from base64 import b64encode, b64decode
 
 def usage() -> None:
     print("python3 main.py <command>")
@@ -7,6 +8,9 @@ def usage() -> None:
     print("command:")
     print("     generate_keys <key_size> <prefix_path>")
     print("     encrypt <public_key_path> <private_key_path>")
+    print("     decrypt <private_key_path> <public_key_path>")
+    print()
+    print("Note that the decrypt command also verifies the signature of the cypher, displaying an error message if it fails to do so.")
     print()
     print("Examples:")
     print("""
@@ -14,11 +18,11 @@ def usage() -> None:
 
     python3 main.py generate_keys 2048 receiver_
 
-    cat rsa_example.txt \\
+    cat rsa_example.txt 
     | python3 main.py encrypt sender_private_key.rsa receiver_public_key.rsa
 
-    cat rsa_example.txt \\
-    | python3 main.py encrypt sender_private_key.rsa receiver_public_key.rsa \\
+    cat rsa_example.txt 
+    | python3 main.py encrypt sender_private_key.rsa receiver_public_key.rsa 
     | python3 main.py decrypt receiver_private_key.rsa sender_public_key.rsa
     """)
     print()
@@ -75,7 +79,9 @@ def main() -> None:
         oaep_len = receiver_public_key.mod.bit_length() // 8
         text_oaep = int.from_bytes(oaep.encode(text, oaep_len), "big")
         cypher, sign = rsa.encrypt_and_sign(text_oaep, sender_private_key, receiver_public_key)
-        print_to_stdout(f"{cypher} {sign}")
+        result = f"{cypher} {sign}".encode("utf-8")
+        result = b64encode(result)
+        print_to_stdout(str(result)[2:-1])
 
     elif command == "decrypt":
         if len(args) < 2:
@@ -88,12 +94,13 @@ def main() -> None:
         receiver_private_key = rsa.read_key(receiver_private_key_path)
         sender_public_key = rsa.read_key(sender_public_key_path)
 
-        txt = read_from_stdin()
+        txt = bytes(read_from_stdin(),"utf-8")
+        txt = str(b64decode(txt))[2:-1]
         cypher, sign = [int(t) for t in txt.split(" ")]
         verify, msg = rsa.decrypt_message_and_verify(cypher, sign, receiver_private_key, sender_public_key)
 
         if (not verify):
-            print_to_stdout("Fail to verify message\n")
+            print_to_stdout("Failed to verify message\n")
             exit(1)
 
         oaep_len = receiver_private_key.mod.bit_length() // 8
