@@ -1,5 +1,6 @@
 import sys, os
 import rsa, oaep
+from base64 import b64encode, b64decode
 
 def usage() -> None:
     print("python3 main.py <command>")
@@ -78,7 +79,9 @@ def main() -> None:
         oaep_len = receiver_public_key.mod.bit_length() // 8
         text_oaep = int.from_bytes(oaep.encode(text, oaep_len), "big")
         cypher, sign = rsa.encrypt_and_sign(text_oaep, sender_private_key, receiver_public_key)
-        print_to_stdout(f"{cypher} {sign}")
+        result = f"{cypher} {sign}".encode("utf-8")
+        result = b64encode(result)
+        print_to_stdout(str(result)[2:-1])
 
     elif command == "decrypt":
         if len(args) < 2:
@@ -91,7 +94,8 @@ def main() -> None:
         receiver_private_key = rsa.read_key(receiver_private_key_path)
         sender_public_key = rsa.read_key(sender_public_key_path)
 
-        txt = read_from_stdin()
+        txt = bytes(read_from_stdin(),"utf-8")
+        txt = str(b64decode(txt))[2:-1]
         cypher, sign = [int(t) for t in txt.split(" ")]
         verify, msg = rsa.decrypt_message_and_verify(cypher, sign, receiver_private_key, sender_public_key)
 
